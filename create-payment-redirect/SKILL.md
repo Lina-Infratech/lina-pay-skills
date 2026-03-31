@@ -164,7 +164,6 @@ const consent = await createPaymentRequest(
   },
   {
     "details": "Detalhes do pagamento",
-    "txId": "TXID1234567890",
     "redirectUri": "https://redirect-demo-opal.vercel.app",
     "cpfCnpj": "08116143018",
     "value": 0.01,
