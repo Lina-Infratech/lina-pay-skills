@@ -1,25 +1,20 @@
 ## Metadata
 
-name: Lina Pay Next.js Skill
-description: Guia para integrar o SDK @lina-openx/web-lina-pay-sdk em páginas web de e-commerce com Next.js (última versão) e ShadCN-UI.
+name: Lina Pay SDK Skill
+description: Guia para integrar o SDK @lina-openx/web-lina-pay-sdk em páginas web
 language: pt-BR
 tags:
 
 - lina-pay
 - sdk
-- nextjs
-- shadcn-ui
-- ecommerce
 - pagamentos
 
 ## Objetivo
 
-Esta Skill orienta a criação de páginas de e-commerce web com integração do SDK `@lina-openx/web-lina-pay-sdk`, seguindo boas práticas de arquitetura no Next.js e padrões de UI com ShadCN-UI.
+Esta Skill orienta a criação de páginas de pagamento open-finance web com integração do SDK `@lina-openx/web-lina-pay-sdk`, seguindo boas práticas de desenvolviment web.
 
 ## Stack Obrigatória
 
-- Framework principal: **Next.js (última versão estável)** com App Router.
-- UI: **ShadCN-UI** com Tailwind CSS.
 - SDK de pagamento: **@lina-openx/web-lina-pay-sdk**.
 - Linguagem recomendada: **TypeScript**.
 
@@ -28,25 +23,21 @@ Esta Skill orienta a criação de páginas de e-commerce web com integração do
 Use esta Skill quando o usuário pedir:
 
 - integração de checkout/pagamento no front-end com Lina Pay;
-- criação de páginas de produto, carrinho e checkout em Next.js;
-- padronização de componentes visuais com ShadCN-UI;
-- arquitetura escalável para e-commerce web.
+- criação de páginas de produto, carrinho e checkout ou outras páginas de pagamento open-finance;
+- padronização de componentes visuais usando framework de UI solicitado pelo usuário.
 
-## Diretrizes Arquiteturais (Next.js)
+## Diretrizes Arquiteturais
 
-1. Usar App Router (`app/`) com separação clara entre:
-   - Server Components para dados e composição de página;
-   - Client Components apenas para interações necessárias (SDK, estado de UI, formulários).
-2. Criar uma camada de domínio para pagamento:
+1. Criar uma camada de domínio para pagamento:
    - `src/features/checkout/` para casos de uso, tipos e integrações;
    - `src/lib/lina-pay/` para wrapper do SDK e helpers.
-3. Evitar acoplamento direto do SDK em múltiplos componentes:
-   - encapsular o SDK em serviço/facade;
+2. Evitar acoplamento direto do SDK em múltiplos componentes:
+   - encapsular o SDK em serviço;
    - expor API interna estável para o restante da aplicação.
-4. Manter segredos no servidor:
+3. Manter segredos no servidor:
    - nunca expor chaves sensíveis no client;
    - usar `process.env` e validação de variáveis.
-5. Tratar estados de pagamento explicitamente:
+4. Tratar estados de pagamento explicitamente:
    - `idle`, `loading`, `success`, `error`, `retry`.
 
 ## Estrutura Recomendada de Pastas
@@ -59,7 +50,7 @@ src/
       cart/
       checkout/
   components/
-    ui/                  # shadcn-ui
+    ui/
     checkout/
   features/
     checkout/
@@ -94,12 +85,6 @@ import { configure } from "@lina-openx/web-lina-pay-sdk";
 
 // Configurar para produção
 configure({
-  iamBaseUrl: "https://iam.prod.linaob.com.br",
-  apiBaseUrl: "https://embedded-payment-manager.prod.linaob.com.br",
-});
-
-// Configurar para homologação (padrão)
-configure({
   iamBaseUrl: "https://iam.linaob.com.br",
   apiBaseUrl: "https://embedded-payment-manager.linaob.com.br",
 });
@@ -121,8 +106,8 @@ Configura as URLs base do SDK para diferentes ambientes.
 
 ```typescript
 configure({
-  iamBaseUrl: "https://iam.prod.linaob.com.br",
-  apiBaseUrl: "https://embedded-payment-manager.prod.linaob.com.br",
+  iamBaseUrl: "https://iam.linaob.com.br",
+  apiBaseUrl: "https://embedded-payment-manager.linaob.com.br",
 });
 ```
 
@@ -164,17 +149,17 @@ const consent = await createPaymentRequest(
   },
   {
     "details": "Detalhes do pagamento",
-    "redirectUri": "https://redirect-demo-opal.vercel.app",
-    "cpfCnpj": "08116143018",
-    "value": 0.01,
+    "redirectUri": "https://pix-portal.linaopenx.com.br/pagamentos/callback",
+    "cpfCnpj": "CPF_DO_CLIENTE", // CPF ou CNPJ do cliente
+    "value": 0.01, // Valor do pagamento indicado pelo cliente
     "creditor": {
       "personType": "PESSOA_JURIDICA",
-      "cpfCnpj": "50685362006773",
-      "name": "Ralph Bragg"
-      "accountNumber": "11188222",
-      "accountIssuer": "0001",
-      "accountIspb": "99999004",
-      "accountType": "SVGS",
+      "cpfCnpj": "20640035000100",
+      "name": "Instituto Gioia de Esporte"
+      "accountNumber": "12920",
+      "accountIssuer": "0297",
+      "accountIspb": "60746948",
+      "accountType": "CACC",
     }
   }
 )
@@ -199,16 +184,15 @@ const consent = await createPaymentRequest(
 
 - Minimizar bundle de checkout com importação sob demanda.
 - Evitar renderização desnecessária de componentes client.
-- Usar cache e revalidação no lado servidor para dados de catálogo.
 
 ## Prompt Base para Uso da Skill
 
 Quando esta Skill for acionada, seguir este fluxo:
 
 1. Confirmar requisitos do checkout (campos, meios de pagamento, regras).
-2. Propor arquitetura em Next.js App Router com separação server/client.
+2. Propor arquitetura usando framework de UI solicitado pelo usuário.
 3. Implementar integração via adapter do `@lina-openx/web-lina-pay-sdk`.
-4. Construir interface com ShadCN-UI.
+4. Construir interface com framework de UI solicitado pelo usuário.
 5. Garantir tratamento de estado, erro, loading e sucesso.
 6. Sugerir testes e checklist de validação final.
 
