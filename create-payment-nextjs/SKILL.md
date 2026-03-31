@@ -1,6 +1,6 @@
 ## Metadata
 
-name: Lina Pay Next.js Skill
+name: create-payment-nextjs
 description: Guia para integrar o SDK @lina-openx/web-lina-pay-sdk em páginas web de e-commerce com Next.js (última versão) e ShadCN-UI.
 language: pt-BR
 tags:
