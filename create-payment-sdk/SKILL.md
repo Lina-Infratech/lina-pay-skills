@@ -1,6 +1,6 @@
 ## Metadata
 
-name: Lina Pay SDK Skill
+name: create-payment-sdk
 description: Guia para integrar o SDK @lina-openx/web-lina-pay-sdk em páginas web
 language: pt-BR
 tags:
