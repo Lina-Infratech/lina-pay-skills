@@ -128,50 +128,55 @@ configure({
 
 ---
 
-### 2. `createConsent(credentials, payload)`
+### 2. `createPaymentRequest(credentials, payload)`
 
-Cria um consentimento de pagamento Open Finance.
+Cria uma solicitação de pagamento e redireciona para o portal de inicialização do pagamento.
 
 **Parâmetros:**
 
 - `credentials`: Objeto com credenciais do subtenant:
   - `subtenantId` (string): ID do subtenant
   - `subtenantSecret` (string): Secret do subtenant
-- `payload`: Objeto `CreateConsentRequest` com:
-  - `organisationId` (string): ID da organização
-  - `authorisationServerId` (string): ID do servidor de autorização
-  - `payment` (objeto): Detalhes do pagamento
-  - `redirectUri` (string, opcional): URI de redirecionamento
-  - `platform` (string, opcional): Plataforma ('APP' | 'WEB')
+- `payload`: Objeto `CreatePaymentRequest` com:
+  - `details` (string): Detalhes do pagamento
+  - `txId` (string): ID da transação (opcional)
+  - `redirectUri` (string): URI de redirecionamento
+  - `cpfCnpj` (string): CPF ou CNPJ do cliente
+  - `value` (number): Valor do pagamento
+  - `creditor` (objeto): Detalhes do crédito
+    - `personType` (string): Tipo de pessoa ('PESSOA_JURIDICA' | 'PESSOA_NATURAL')
+    - `cpfCnpj` (string): CPF ou CNPJ do cliente
+    - `name` (string): Nome do cliente
+    - `accountNumber` (string): Número da conta
+    - `accountIssuer` (string): Emissor da conta
+    - `accountIspb` (string): ISPB da conta
+    - `accountType` (string): Tipo de conta ('CACC' | 'SVGS')
 
-**Retorna:** `Promise<CreateConsentResponse>` com `consentId` e `redirectUrl`
+**Retorna:** `Promise<CreatePaymentResponse>` com `id` e `redirectUrl`
 
 **Exemplo:**
 
 ```typescript
-const consent = await createConsent(
+const consent = await createPaymentRequest(
   {
     subtenantId: 'seu-subtenant-id',
     subtenantSecret: 'seu-subtenant-secret'
   },
   {
-    organisationId: 'c8f0bf49-4744-4933-8960-7add6e590841',
-    authorisationServerId: 'c8f0bf49-4744-4933-8960-7add6e590841',
-    payment: {
-      redirectUri: 'https://exemplo.com/redirect',
-      value: 1500.50,
-      creditor: {
-        name: 'João Silva',
-        personType: 'PESSOA_NATURAL',
-        cpfCnpj: '12345678901',
-        accountNumber: '12345-6',
-        accountIssuer: '0001',
-        accountPixKey: 'joao@exemplo.com',
-        accountIspb: '12345678',
-        accountType: 'CACC'
-      }
-    },
-    platform: 'WEB'
+    "details": "Detalhes do pagamento",
+    "txId": "TXID1234567890",
+    "redirectUri": "https://redirect-demo-opal.vercel.app",
+    "cpfCnpj": "08116143018",
+    "value": 0.01,
+    "creditor": {
+      "personType": "PESSOA_JURIDICA",
+      "cpfCnpj": "50685362006773",
+      "name": "Ralph Bragg"
+      "accountNumber": "11188222",
+      "accountIssuer": "0001",
+      "accountIspb": "99999004",
+      "accountType": "SVGS",
+    }
   }
 )
 - Usar o retorno redirectUrl para redirecionar o usuário para o portal de inicialização do pagamento.
