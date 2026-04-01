@@ -1,5 +1,5 @@
 ---
-name: create-payment-nextjs
+name: nextjs-consent
 description: Guia para integrar o SDK @lina-openx/web-lina-pay-sdk em páginas web de e-commerce com Next.js (última versão) e ShadCN-UI.
 language: pt-BR
 tags:
@@ -127,57 +127,65 @@ configure({
 
 ---
 
-### 2. `createPaymentRequest(credentials, payload)`
+### 2. `createConsent(credentials, payload)`
 
-Cria uma solicitação de pagamento e redireciona para o portal de inicialização do pagamento.
+Cria o consentimento de pagamento (Open Finance) e retorna a URL para o usuário concluir a autorização no fluxo correto. Documentação alinhada ao skill `web-lina-pay-sdk` e ao tipo `CreateConsentRequest` / `CreateConsentResponse` do pacote.
 
 **Parâmetros:**
 
-- `credentials`: Objeto com credenciais do subtenant:
+- `credentials`: `LinaPayCredentials` — credenciais do subtenant:
   - `subtenantId` (string): ID do subtenant
   - `subtenantSecret` (string): Secret do subtenant
-- `payload`: Objeto `CreatePaymentRequest` com:
-  - `details` (string): Detalhes do pagamento
-  - `txId` (string): ID da transação (opcional)
-  - `redirectUri` (string): URI de redirecionamento
-  - `cpfCnpj` (string): CPF ou CNPJ do cliente
-  - `value` (number): Valor do pagamento
-  - `creditor` (objeto): Detalhes do crédito
-    - `personType` (string): Tipo de pessoa ('PESSOA_JURIDICA' | 'PESSOA_NATURAL')
-    - `cpfCnpj` (string): CPF ou CNPJ do cliente
-    - `name` (string): Nome do cliente
-    - `accountNumber` (string): Número da conta
-    - `accountIssuer` (string): Emissor da conta
-    - `accountIspb` (string): ISPB da conta
-    - `accountType` (string): Tipo de conta ('CACC' | 'SVGS')
+- `payload`: `CreateConsentRequest` com:
+  - `organisationId` (string): ID da organização
+  - `authorisationServerId` (string): ID do servidor de autorização (detentora)
+  - `payment` (objeto `Payment`): dados do pagamento a consentir
+    - `redirectUri` (string): URI de redirecionamento após o fluxo
+    - `value` (number): Valor do pagamento
+    - `creditor` (objeto `Creditor`): dados do recebedor
+      - `name`, `personType` (`'PESSOA_JURIDICA' | 'PESSOA_NATURAL'`), `cpfCnpj`
+      - `accountNumber`, `accountIssuer`, `accountPixKey`, `accountIspb`, `accountType` (`'CACC' | 'SVGS'`)
+    - `details`, `externalId`, `cpfCnpj`, `debitor`, `schedule`, `txId`, `originalRecurringPaymentId` — opcionais conforme `reference.md` do skill web-lina-pay-sdk
+  - `redirectUri` (string, opcional): pode complementar/sobrepor redirecionamento no nível do consentimento
+  - `platform` (opcional): `'APP' | 'WEB'`
 
-**Retorna:** `Promise<CreatePaymentResponse>` com `id` e `redirectUrl`
+**Retorna:** `Promise<CreateConsentResponse>` com `consentId`, `redirectUrl` e `id`.
 
 **Exemplo:**
 
 ```typescript
-const consent = await createPaymentRequest(
+import { createConsent } from "@lina-openx/web-lina-pay-sdk";
+
+const consent = await createConsent(
   {
-    subtenantId: 'seu-subtenant-id',
-    subtenantSecret: 'seu-subtenant-secret'
+    subtenantId: "seu-subtenant-id",
+    subtenantSecret: "seu-subtenant-secret",
   },
   {
-    "details": "Detalhes do pagamento",
-    "redirectUri": "https://redirect-demo-opal.vercel.app",
-    "cpfCnpj": "08116143018",
-    "value": 0.01,
-    "creditor": {
-      "personType": "PESSOA_JURIDICA",
-      "cpfCnpj": "50685362006773",
-      "name": "Ralph Bragg"
-      "accountNumber": "11188222",
-      "accountIssuer": "0001",
-      "accountIspb": "99999004",
-      "accountType": "SVGS",
-    }
+    organisationId: "sua-organisation-id",
+    authorisationServerId: "seu-authorisation-server-id",
+    platform: "WEB",
+    payment: {
+      details: "Detalhes do pagamento",
+      redirectUri: "https://redirect-demo-opal.vercel.app",
+      cpfCnpj: "08116143018",
+      value: 0.01,
+      creditor: {
+        personType: "PESSOA_JURIDICA",
+        cpfCnpj: "50685362006773",
+        name: "Ralph Bragg",
+        accountNumber: "11188222",
+        accountIssuer: "0001",
+        accountPixKey: "sua-chave-pix",
+        accountIspb: "99999004",
+        accountType: "SVGS",
+      },
+    },
   }
-)
-- Usar o retorno redirectUrl para redirecionar o usuário para o portal de inicialização do pagamento.
+);
+```
+
+- Usar `consent.redirectUrl` para redirecionar o usuário ao fluxo de consentimento/autorização.
 
 ## Boas Práticas de UI/UX (ShadCN-UI)
 
